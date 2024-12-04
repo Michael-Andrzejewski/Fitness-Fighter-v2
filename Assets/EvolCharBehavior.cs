@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 
 public class EvolCharBehavior : MonoBehaviour
 {
@@ -27,30 +26,32 @@ public class EvolCharBehavior : MonoBehaviour
     public string tagToAttack = "Enemy";
     public TextMeshPro nameTag;
     public float generalEvolutionStdDeviation = 0.1f;
-    public bool geneticInstability = false; //if true, the evolution rate itself changes
-
+    public bool geneticInstability = false;
     public bool similarColor = false;
 
+    // OpenAI Configuration
     private readonly string openAIEndpoint = "https://api.openai.com/v1/chat/completions";
-    private readonly string apiKey; // Set this via Unity Inspector or configuration
-    private float aiThinkingInterval = 2f; // How often the AI makes decisions
-    private float lastThinkTime;
+    [SerializeField, Tooltip("Your OpenAI API Key")]
+    private string apiKey;
+    [SerializeField, Range(0.5f, 10f)]
+    private float aiThinkingInterval = 2f;
     
     public Queue<string> messageHistory = new Queue<string>();
     private const int MAX_MESSAGE_HISTORY = 10;
     public TextMeshPro messageDisplay;
+    [SerializeField]
     private float messageDisplayDuration = 5f;
     
     [System.Serializable]
     private class OpenAIRequest
     {
-        public string model = "gpt-4";
-        public List<Message> messages;
+        public string model = "gpt-4o-mini";
+        public List<MessageData> messages;
         public float temperature = 0.7f;
     }
 
     [System.Serializable]
-    private class Message
+    private class MessageData
     {
         public string role;
         public string content;
@@ -65,7 +66,7 @@ public class EvolCharBehavior : MonoBehaviour
     [System.Serializable]
     private class Choice
     {
-        public Message message;
+        public MessageData message;
     }
 
     void Start()
@@ -149,17 +150,18 @@ public class EvolCharBehavior : MonoBehaviour
 
             var request = new OpenAIRequest
             {
-                messages = new List<Message>
+                messages = new List<MessageData>
                 {
-                    new Message { role = "system", content = "You are a fighting character. Respond with exactly ONE action in brackets." },
-                    new Message { role = "user", content = prompt }
+                    new MessageData { role = "system", content = "You are a fighting character. Respond with exactly ONE action in brackets." },
+                    new MessageData { role = "user", content = prompt }
                 }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+            var jsonRequest = JsonUtility.ToJson(request);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
             var response = await client.PostAsync(openAIEndpoint, content);
             var responseString = await response.Content.ReadAsStringAsync();
-            var openAIResponse = JsonConvert.DeserializeObject<OpenAIResponse>(responseString);
+            var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
 
             return openAIResponse.choices[0].message.content;
         }
@@ -178,6 +180,7 @@ public class EvolCharBehavior : MonoBehaviour
                 closestEnemy = target;
                 if (Vector3.Distance(transform.position, target.transform.position) < attackRange)
                 {
+                    Debug.Log($"<{gameObject.name}> Attacking {targetName}!");
                     StartCoroutine(Attack());
                 }
             }
@@ -191,13 +194,16 @@ public class EvolCharBehavior : MonoBehaviour
             string targetName = messageMatch.Groups[1].Value;
             string message = messageMatch.Groups[2].Value;
             DisplayMessage(message);
-            AddToMessageHistory($"{gameObject.name} to {targetName}: {message}");
+            string formattedMessage = $"<{gameObject.name}> to {targetName}: {message}";
+            Debug.Log(formattedMessage);
+            AddToMessageHistory(formattedMessage);
             return;
         }
 
         // Parse move command
         if (action.Contains("[move]"))
         {
+            Debug.Log($"<{gameObject.name}> Moving towards enemy.");
             MoveTowardsEnemy();
         }
     }
@@ -206,7 +212,7 @@ public class EvolCharBehavior : MonoBehaviour
     {
         if (messageDisplay != null)
         {
-            messageDisplay.text = message;
+            messageDisplay.text = $"{gameObject.name}: {message}";
             StartCoroutine(ClearMessageAfterDelay());
         }
     }
@@ -312,21 +318,21 @@ public class EvolCharBehavior : MonoBehaviour
             if (!enemyEvolStats.killed)
             {
                 enemyEvolStats.currentHealth -= evolStats.attackDamage;
+                Debug.Log($"<{gameObject.name}> Hit {closestEnemy.name} for {evolStats.attackDamage} damage! {closestEnemy.name}'s health: {enemyEvolStats.currentHealth}/{enemyEvolStats.maxHealth}");
             }
 
             if (enemyEvolStats.currentHealth <= 0 && !enemyEvolStats.killed)
             {
                 enemyEvolStats.killed = true;
+                Debug.Log($"<{gameObject.name}> Defeated {closestEnemy.name}!");
 
                 closestEnemy.GetComponent<Animator>().SetBool("Death", true);
                 closestEnemy.GetComponent<NavMeshAgent>().enabled = false;
                 closestEnemy.AddComponent<DeleteAfterSeconds>().seconds = 30;
 
-                // Disable EvolCharBehavior for the dead enemy
                 closestEnemy.GetComponent<EvolCharBehavior>().enabled = false;
                 closestEnemy.tag = "Dead";
 
-                // Spawn a clone upon killing enemy
                 SpawnClone();
             }
         }
