@@ -109,6 +109,7 @@ public class EvolCharBehavior : MonoBehaviour
     {
         string prompt = GeneratePrompt();
         string action = await GetAIResponse(prompt);
+        Debug.Log($"<{gameObject.name}> AI Output: {action}");
         ProcessAIAction(action);
     }
 
