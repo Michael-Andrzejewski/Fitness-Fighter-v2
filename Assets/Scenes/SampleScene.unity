@@ -1966,7 +1966,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &714949834
 GameObject:
@@ -2484,7 +2484,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &755330354
 GameObject:
@@ -2842,6 +2842,12 @@ MonoBehaviour:
   aiThinkingInterval: 2
   messageDisplay: {fileID: 734202527}
   messageDisplayDuration: 5
+  systemPrompt: You are a fighting character. Respond with exactly ONE action in
+    brackets. You should prioritize communication over combat, but be ready to fight
+    if necessary. Remember to communicate if you are being attacked, and by who.
+    You will have to tell allies to attack the attacker to save yourself. ONCE YOU
+    ARE LOSING HEALTH, YOU MUST ATTACK. Your responses should reflect your character's
+    personality and experiences.
 --- !u!114 &866946316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2858,8 +2864,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -2904,7 +2910,7 @@ Transform:
   - {fileID: 1739135707}
   - {fileID: 528771064}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &872642050
 GameObject:
@@ -4908,6 +4914,12 @@ MonoBehaviour:
   aiThinkingInterval: 2
   messageDisplay: {fileID: 1341263791}
   messageDisplayDuration: 5
+  systemPrompt: You are a fighting character. Respond with exactly ONE action in
+    brackets. You should prioritize communication over combat, but be ready to fight
+    if necessary. Remember to communicate if you are being attacked, and by who.
+    You will have to tell allies to attack the attacker to save yourself. ONCE YOU
+    ARE LOSING HEALTH, YOU MUST ATTACK. Your responses should reflect your character's
+    personality and experiences.
 --- !u!114 &1612230473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4924,8 +4936,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -4970,7 +4982,7 @@ Transform:
   - {fileID: 138238866}
   - {fileID: 1184251109}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1621273435
 GameObject:
@@ -9482,8 +9494,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -9521,6 +9533,10 @@ MonoBehaviour:
   aiThinkingInterval: 2
   messageDisplay: {fileID: 7855343424241444486}
   messageDisplayDuration: 5
+  systemPrompt: You are a fighting character. Respond with exactly ONE action in
+    brackets. You are extremely warlike and will collaborate with your ancestors
+    and children. Choose a character to attack right away. Your responses should
+    reflect your character's personality and experiences.
 --- !u!4 &6224101365840319866
 Transform:
   m_ObjectHideFlags: 0
@@ -11914,6 +11930,12 @@ MonoBehaviour:
   aiThinkingInterval: 2
   messageDisplay: {fileID: 7855343425471951751}
   messageDisplayDuration: 5
+  systemPrompt: You are a fighting character. Respond with exactly ONE action in
+    brackets. You should prioritize communication over combat, but be ready to fight
+    if necessary. Remember to communicate if you are being attacked, and by who.
+    You will have to tell allies to attack the attacker to save yourself. ONCE YOU
+    ARE NOT AT FULL HEALTH, YOU MUST ATTACK TO DEFEND YOURSELF. You may message others
+    to attack your attacker as well.
 --- !u!114 &6224101366789800057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11930,8 +11952,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
