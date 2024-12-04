@@ -34,7 +34,7 @@ public class EvolCharBehavior : MonoBehaviour
     private readonly string openAIEndpoint = "https://api.openai.com/v1/chat/completions";
     [SerializeField, Tooltip("Your OpenAI API Key")]
     private string apiKey;
-    [SerializeField, Range(0.5f, 10f)]
+    [SerializeField, Range(0.5f, 20f)]
     private float aiThinkingInterval = 2f;
     
     public Queue<string> messageHistory = new Queue<string>();
@@ -75,6 +75,12 @@ public class EvolCharBehavior : MonoBehaviour
 
     [SerializeField, TextArea(3, 10)]
     private string systemPrompt = "You are a fighting character. Respond with exactly ONE action in brackets. You should prioritize communication over combat, but be ready to fight if necessary. Your responses should reflect your character's personality and experiences.";
+
+    [SerializeField, TextArea(3, 10)]
+    private string instructionPrompt = "You may communicate or attack other characters arbitrarily. Respond with ONE action in brackets:\n[message characterName: Your message] - to communicate\n[attack characterName] - to attack";
+
+    [SerializeField, TextArea(3, 10)]
+    private string contextPrompt = "Consider your character's history, relationships, and current situation when making decisions.";
 
     void Start()
     {
@@ -141,23 +147,23 @@ public class EvolCharBehavior : MonoBehaviour
 
     string GeneratePrompt()
     {
-        StringBuilder prompt = new StringBuilder();
-        prompt.AppendLine($"You are {gameObject.name}, a character in a fighting arena. Your stats are:");
-        prompt.AppendLine($"Health: {evolStats.currentHealth}/{evolStats.maxHealth}");
-        prompt.AppendLine($"Attack Damage: {evolStats.attackDamage}");
-        prompt.AppendLine($"Movement Speed: {evolStats.movementSpeed}");
+        StringBuilder contextBuilder = new StringBuilder();
+        contextBuilder.AppendLine($"You are {gameObject.name}, a character in a fighting arena. Your stats are:");
+        contextBuilder.AppendLine($"Health: {evolStats.currentHealth}/{evolStats.maxHealth}");
+        contextBuilder.AppendLine($"Attack Damage: {evolStats.attackDamage}");
+        contextBuilder.AppendLine($"Movement Speed: {evolStats.movementSpeed}");
         
         if (defeatedCharacters.Count > 0)
         {
-            prompt.AppendLine("\nDefeated characters:");
+            contextBuilder.AppendLine("\nDefeated characters:");
             foreach (string defeat in defeatedCharacters)
             {
-                prompt.AppendLine($"- {defeat}");
+                contextBuilder.AppendLine($"- {defeat}");
             }
         }
 
         // List all available characters
-        prompt.AppendLine("\nAvailable characters to interact with:");
+        contextBuilder.AppendLine("\nAvailable characters to interact with:");
         GameObject[] allCharacters = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject character in allCharacters)
         {
@@ -167,7 +173,7 @@ public class EvolCharBehavior : MonoBehaviour
                 if (charStats != null && charStats.currentHealth > 0)
                 {
                     float distance = Vector3.Distance(transform.position, character.transform.position);
-                    prompt.AppendLine($"- {character.name} (Health: {charStats.currentHealth}/{charStats.maxHealth}, Distance: {distance:F1})");
+                    contextBuilder.AppendLine($"- {character.name} (Health: {charStats.currentHealth}/{charStats.maxHealth}, Distance: {distance:F1})");
                 }
             }
         }
@@ -176,21 +182,21 @@ public class EvolCharBehavior : MonoBehaviour
         {
             var enemyStats = closestEnemy.GetComponent<EvolStats>();
             float distance = Vector3.Distance(transform.position, closestEnemy.transform.position);
-            prompt.AppendLine($"\nNearest enemy is {closestEnemy.name} at distance {distance:F1}:");
-            prompt.AppendLine($"Enemy Health: {enemyStats.currentHealth}/{enemyStats.maxHealth}");
+            contextBuilder.AppendLine($"\nNearest enemy is {closestEnemy.name} at distance {distance:F1}:");
+            contextBuilder.AppendLine($"Enemy Health: {enemyStats.currentHealth}/{enemyStats.maxHealth}");
         }
 
-        prompt.AppendLine("\nRecent messages:");
+        contextBuilder.AppendLine("\nRecent messages:");
         foreach (string msg in messageHistory)
         {
-            prompt.AppendLine(msg);
+            contextBuilder.AppendLine(msg);
         }
 
-        prompt.AppendLine("\nYou may communicate or attack other characters arbitrarily. " + systemPrompt);
-        prompt.AppendLine("Respond with ONE action in brackets:");
-        prompt.AppendLine("[message characterName: Your message] - to communicate");
-        prompt.AppendLine("[attack characterName] - to attack (will automatically move towards target)");
-        prompt.AppendLine("\nNote: You can only message or attack characters listed above.");
+        contextBuilder.AppendLine("\n" + contextPrompt);
+
+        StringBuilder prompt = new StringBuilder();
+        prompt.AppendLine(contextBuilder.ToString());
+        prompt.AppendLine("\n" + instructionPrompt);
 
         return prompt.ToString();
     }
@@ -347,6 +353,16 @@ public class EvolCharBehavior : MonoBehaviour
         if (!isAttacking && agent.enabled)
         {
             agent.speed = evolStats.movementSpeed;
+            
+            // If we have a target and we're in range, start attacking
+            if (closestEnemy != null && !closestEnemy.CompareTag("Dead"))
+            {
+                float distanceToTarget = Vector3.Distance(transform.position, closestEnemy.transform.position);
+                if (distanceToTarget <= attackRange)
+                {
+                    StartCoroutine(Attack());
+                }
+            }
         }
     }
 
@@ -400,27 +416,41 @@ public class EvolCharBehavior : MonoBehaviour
 
     IEnumerator Attack()
     {
-        if (closestEnemy == null || evolStats.currentHealth <= 0 ||
-            closestEnemy.GetComponent<EvolStats>().currentHealth <= 0)
+        // Prevent multiple attack coroutines from running at the same time
+        if (isAttacking)
         {
-            isAttacking = false;
-            // Find a new enemy when current one is dead or null
-            closestEnemy = FindClosestEnemy();
             yield break;
         }
+        isAttacking = true;
 
-        agent.SetDestination(transform.position);
-        transform.LookAt(closestEnemy.transform);
-
-        animator.SetBool("isPunching", true);
-        animator.SetFloat("punchingSpeed", (1.2f / (evolStats.attackSpeed / 2)));
-
-        yield return new WaitForSeconds(evolStats.attackSpeed / 2);
-
-        EvolStats enemyEvolStats = closestEnemy.GetComponent<EvolStats>();
-
-        if (Vector3.Distance(transform.position, closestEnemy.transform.position) < attackRange)
+        while (closestEnemy != null && evolStats.currentHealth > 0 && !closestEnemy.CompareTag("Dead"))
         {
+            float distanceToTarget = Vector3.Distance(transform.position, closestEnemy.transform.position);
+            
+            // If we're too far, move towards target
+            if (distanceToTarget > attackRange)
+            {
+                animator.SetBool("isPunching", false);
+                if (agent.enabled && closestEnemy.GetComponent<NavMeshAgent>().enabled)
+                {
+                    agent.SetDestination(closestEnemy.transform.position);
+                }
+                yield return null;
+                continue;
+            }
+
+            // We're in range, stop moving and attack
+            agent.SetDestination(transform.position);
+            transform.LookAt(closestEnemy.transform);
+
+            // Set animation speed to match attack speed
+            animator.SetFloat("punchingSpeed", 1f / evolStats.attackSpeed);
+            animator.SetBool("isPunching", true);
+
+            // Wait for the animation to reach its "hit" point (approximately halfway through)
+            yield return new WaitForSeconds(evolStats.attackSpeed * 0.5f);
+
+            EvolStats enemyEvolStats = closestEnemy.GetComponent<EvolStats>();
             if (!enemyEvolStats.killed)
             {
                 enemyEvolStats.currentHealth -= evolStats.attackDamage;
@@ -442,27 +472,17 @@ public class EvolCharBehavior : MonoBehaviour
                 closestEnemy.tag = "Dead";
 
                 SpawnClone();
-                
-                // Find new enemy after defeating current one
-                closestEnemy = FindClosestEnemy();
+                break;
             }
+
+            // Wait for the animation to complete
+            yield return new WaitForSeconds(evolStats.attackSpeed * 0.5f);
+            animator.SetBool("isPunching", false);
         }
 
-        animator.SetBool("isPunching", false);
-
-        yield return new WaitForSeconds(evolStats.attackSpeed / 2);
-
-        if (closestEnemy != null && Vector3.Distance(transform.position, closestEnemy.transform.position) < attackRange &&
-            closestEnemy.GetComponent<EvolStats>().currentHealth > 0 && evolStats.currentHealth > 0)
-        {
-            StartCoroutine(Attack());
-        }
-        else
-        {
-            isAttacking = false;
-            // Try to find a new enemy when attack sequence ends
-            closestEnemy = FindClosestEnemy();
-        }
+        isAttacking = false;
+        // Try to find a new enemy when attack sequence ends
+        closestEnemy = FindClosestEnemy();
     }
 
     async Task<string> GetConversationSummary()
@@ -634,6 +654,85 @@ public class EvolCharBehavior : MonoBehaviour
         if (cloneNameTag != null)
         {
             cloneNameTag.text = clone.name;
+        }
+    }
+
+    async void SpawnChild()
+    {
+        // Find valid spawn position
+        Vector3 randomPosition = transform.position + Random.insideUnitSphere * 50;
+        NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, 50, 1);
+
+        // Spawn and setup child
+        GameObject child = Instantiate(clonableDuplicate, hit.position, Quaternion.identity);
+        EvolCharBehavior childBehavior = child.GetComponent<EvolCharBehavior>();
+        EvolStats childStats = child.GetComponent<EvolStats>();
+
+        // Inherit properties with slight mutations
+        childStats.attackDamage = evolStats.attackDamage * Random.Range(0.9f, 1.1f);
+        childStats.maxHealth = evolStats.maxHealth * Random.Range(0.9f, 1.1f);
+        childStats.currentHealth = childStats.maxHealth;
+        childStats.movementSpeed = evolStats.movementSpeed * Random.Range(0.9f, 1.1f);
+
+        // Inherit prompts with potential for mutation
+        if (Random.value > 0.7f) // 30% chance to modify each prompt
+        {
+            childBehavior.systemPrompt = await GetModifiedPrompt(systemPrompt);
+            childBehavior.instructionPrompt = await GetModifiedPrompt(instructionPrompt);
+            childBehavior.contextPrompt = await GetModifiedPrompt(contextPrompt);
+        }
+        else
+        {
+            childBehavior.systemPrompt = systemPrompt;
+            childBehavior.instructionPrompt = instructionPrompt;
+            childBehavior.contextPrompt = contextPrompt;
+        }
+
+        // Set unique name
+        string baseName = gameObject.name.Split(new[] { " Gen " }, System.StringSplitOptions.None)[0];
+        int generation = GetGeneration() + 1;
+        child.name = $"{baseName} Gen {generation}";
+        
+        if (child.GetComponentInChildren<TextMeshPro>() is TextMeshPro nameTag)
+        {
+            nameTag.text = child.name;
+        }
+    }
+
+    private int GetGeneration()
+    {
+        string[] nameParts = gameObject.name.Split(new[] { " Gen " }, System.StringSplitOptions.None);
+        if (nameParts.Length > 1 && int.TryParse(nameParts[1], out int generation))
+        {
+            return generation;
+        }
+        return 1;
+    }
+
+    private async Task<string> GetModifiedPrompt(string originalPrompt)
+    {
+        string modificationRequest = $"Modify this AI character prompt while maintaining its core purpose but adding a unique personality twist:\n\n{originalPrompt}";
+        
+        using (var client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+            var request = new OpenAIRequest
+            {
+                messages = new List<MessageData>
+                {
+                    new MessageData { role = "system", content = "You are a prompt engineer. Modify prompts to create unique but coherent variations." },
+                    new MessageData { role = "user", content = modificationRequest }
+                }
+            };
+
+            var jsonRequest = JsonUtility.ToJson(request);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(openAIEndpoint, content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
+
+            return openAIResponse.choices[0].message.content;
         }
     }
 }
