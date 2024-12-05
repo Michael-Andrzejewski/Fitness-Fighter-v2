@@ -301,12 +301,38 @@ public class AI_ControllerBehavior : MonoBehaviour
                 {
                     string targetName = messageMatch.Groups[1].Value.Trim();
                     string message = messageMatch.Groups[2].Value.Trim();
-                    
-                    // Send the message using existing SendMessage method
                     SendMessage(targetName, message);
+                    return;
                 }
-                
-                // TODO: Process attack commands in future update
+
+                // Process attack command
+                var attackMatch = System.Text.RegularExpressions.Regex.Match(aiOutput, @"\[attack ([^\]]+)\]");
+                if (attackMatch.Success)
+                {
+                    string targetName = attackMatch.Groups[1].Value.Trim();
+                    Debug.Log($"<{gameObject.name}> Attempting to attack {targetName}");
+                    var target = GameObject.Find(targetName);
+                    if (target != null && target.CompareTag("Enemy") && !target.CompareTag("Dead"))
+                    {
+                        EvolStats targetStats = target.GetComponent<EvolStats>();
+                        if (targetStats != null && targetStats.currentHealth > 0)
+                        {
+                            this.targetName = targetName;  // Set the target name for the Update method
+                            float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
+                            
+                            // If in range, start attack immediately
+                            if (distanceToTarget <= attackRange)
+                            {
+                                StartCoroutine(Attack(target));
+                            }
+                            // Otherwise, the Update method will handle movement and attacking
+                            else if (agent != null && agent.enabled)
+                            {
+                                agent.SetDestination(target.transform.position);
+                            }
+                        }
+                    }
+                }
             }
         }
         catch (Exception e)
