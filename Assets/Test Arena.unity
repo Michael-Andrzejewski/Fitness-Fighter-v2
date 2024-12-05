@@ -4929,8 +4929,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -4950,7 +4950,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65f28a5f2c66d46418fdf97bf4eaf819, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAttacking: 0
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
@@ -4973,7 +4972,6 @@ MonoBehaviour:
   aiAgentPrefab: {fileID: 992141421}
   attackRange: 2
   attackSpeed: 1
-  attackDamage: 1
   globalChatHistory: 
   messageToSend: 
   receiverName: 
@@ -8008,8 +8006,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -8029,7 +8027,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65f28a5f2c66d46418fdf97bf4eaf819, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAttacking: 0
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
@@ -8053,7 +8050,6 @@ MonoBehaviour:
   aiAgentPrefab: {fileID: 0}
   attackRange: 2
   attackSpeed: 1
-  attackDamage: 1
   globalChatHistory: 
   messageToSend: 
   receiverName: 
@@ -9290,8 +9286,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -9311,7 +9307,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65f28a5f2c66d46418fdf97bf4eaf819, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAttacking: 0
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
@@ -9334,7 +9329,6 @@ MonoBehaviour:
   aiAgentPrefab: {fileID: 1994900903}
   attackRange: 2
   attackSpeed: 1
-  attackDamage: 1
   globalChatHistory: 
   messageToSend: 
   receiverName: 
@@ -11796,8 +11790,8 @@ MonoBehaviour:
   faction: 
   attackDamage: 1
   attackSpeed: 1
-  maxHealth: 10
-  currentHealth: 10
+  maxHealth: 100
+  currentHealth: 100
   movementSpeed: 1
   attackRange: 2
   healthRegen: 0
@@ -11911,7 +11905,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65f28a5f2c66d46418fdf97bf4eaf819, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAttacking: 0
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
@@ -11934,8 +11927,12 @@ MonoBehaviour:
   aiAgentPrefab: {fileID: 7956449420209920692}
   attackRange: 2
   attackSpeed: 1
-  attackDamage: 1
-  globalChatHistory: 
+  globalChatHistory: '[02:22:51] Sam -> Michael: I appreciate your follow-up, Michael.
+    I agree that we should form a solid strategy together. Let''s focus on Clare
+    as our first target. Her proximity to us gives us an advantage. What are your
+    thoughts on the best way to approach this?
+
+'
   messageToSend: 
   receiverName: 
   sendMessageButton: 0

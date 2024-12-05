@@ -40,7 +40,6 @@ public class AI_ControllerBehavior : MonoBehaviour
     [Header("Combat")]
     public float attackRange = 2f;
     public float attackSpeed = 1f;
-    public float attackDamage = 1f;
     private NavMeshAgent agent;
     private Animator animator;
 
@@ -86,6 +85,8 @@ public class AI_ControllerBehavior : MonoBehaviour
         public MessageData message;
     }
 
+    private bool isAttacking = false;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -125,6 +126,9 @@ public class AI_ControllerBehavior : MonoBehaviour
             
             // Optional: Add deletion after delay
             gameObject.AddComponent<DeleteAfterSeconds>().seconds = 30;
+            
+            // Clear target to stop any movement
+            targetName = "";
             
             return;
         }
@@ -181,11 +185,35 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     IEnumerator Attack(GameObject target)
     {
-        if (target == null || target == gameObject)
+        // Prevent multiple attack coroutines from running at the same time
+        if (isAttacking)
+        {
             yield break;
+        }
+        isAttacking = true;
+
+        if (target == null || target == gameObject)
+        {
+            isAttacking = false;
+            yield break;
+        }
+
+        // Get our own stats
+        var myStats = GetComponent<EvolStats>();
+        if (myStats == null || myStats.killed)
+        {
+            isAttacking = false;
+            yield break;
+        }
 
         while (target != null)
         {
+            // Check if we're dead or our NavMeshAgent is disabled
+            if (myStats.killed || !agent.enabled || !agent.isOnNavMesh)
+            {
+                break;
+            }
+
             // Check target's health and tag
             var targetStats = target.GetComponent<EvolStats>();
             if (targetStats == null || targetStats.currentHealth <= 0 || targetStats.killed || target.CompareTag("Dead"))
@@ -197,7 +225,8 @@ public class AI_ControllerBehavior : MonoBehaviour
             
             if (distance > attackRange)
             {
-                if (agent != null && agent.enabled)
+                // Only try to move if we have a valid NavMeshAgent
+                if (agent != null && agent.enabled && agent.isOnNavMesh)
                 {
                     agent.SetDestination(target.transform.position);
                 }
@@ -206,25 +235,27 @@ public class AI_ControllerBehavior : MonoBehaviour
             }
 
             // Stop moving and face target
-            if (agent != null)
+            if (agent != null && agent.enabled && agent.isOnNavMesh)
+            {
                 agent.SetDestination(transform.position);
+            }
             transform.LookAt(target.transform);
 
-            // Trigger attack animation if available
+            // Set animation speed to match attack speed and start animation
             if (animator != null)
             {
+                animator.SetFloat("punchingSpeed", 1f / myStats.attackSpeed);
                 animator.SetBool("isPunching", true);
-                animator.SetFloat("punchingSpeed", 1f / attackSpeed);
             }
 
-            // Wait for attack animation midpoint
-            yield return new WaitForSeconds(attackSpeed * 0.5f);
+            // Wait for animation to reach "hit" point (halfway through)
+            yield return new WaitForSeconds(myStats.attackSpeed * 0.5f);
 
-            // Apply damage
+            // Apply damage using EvolStats attackDamage
             if (!targetStats.killed && !target.CompareTag("Dead"))
             {
-                targetStats.currentHealth -= attackDamage;
-                Debug.Log($"<{gameObject.name}> Hit {target.name} for {attackDamage} damage! {target.name}'s health: {targetStats.currentHealth}/{targetStats.maxHealth}");
+                targetStats.currentHealth -= myStats.attackDamage;
+                Debug.Log($"<{gameObject.name}> Hit {target.name} for {myStats.attackDamage} damage! {target.name}'s health: {targetStats.currentHealth}/{targetStats.maxHealth}");
 
                 if (targetStats.currentHealth <= 0)
                 {
@@ -233,8 +264,8 @@ public class AI_ControllerBehavior : MonoBehaviour
                 }
             }
 
-            // Complete attack animation
-            yield return new WaitForSeconds(attackSpeed * 0.5f);
+            // Wait for animation to complete
+            yield return new WaitForSeconds(myStats.attackSpeed * 0.5f);
             if (animator != null)
             {
                 animator.SetBool("isPunching", false);
@@ -247,6 +278,7 @@ public class AI_ControllerBehavior : MonoBehaviour
             animator.SetBool("isPunching", false);
         }
 
+        isAttacking = false;
         targetName = "";
     }
 
