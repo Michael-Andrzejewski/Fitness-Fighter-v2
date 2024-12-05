@@ -1576,7 +1576,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -1594,6 +1600,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &129576547
 Animator:
   serializedVersion: 5
@@ -3299,7 +3306,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -3317,6 +3330,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &288532389
 Animator:
   serializedVersion: 5
@@ -5319,7 +5333,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -5337,6 +5357,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &419317706
 Animator:
   serializedVersion: 5
@@ -8826,7 +8847,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -8844,6 +8871,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &723695537
 Animator:
   serializedVersion: 5
@@ -12163,7 +12191,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -12181,6 +12215,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &992141426
 Animator:
   serializedVersion: 5
@@ -18812,7 +18847,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -18830,6 +18871,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &1745866272
 Animator:
   serializedVersion: 5
@@ -21583,17 +21625,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetName: 
   revealNearbyStats: 1
-  systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
-    with other agents and engage in combat. Your responses should reflect your personality
-    and strategic thinking. Focus on building alliances when possible, but remember
-    that attacking is ultimately how you win the game. Successfully attacking and
-    defeating another character will gain you points.
-
-    Characters may die and
-    disappear so if they do not appear in the ''nearby agents'' list, they are dead
-    and cannot be interacted with.
-
-    When targeting, write the full name.'
+  systemPrompt: "You are an AI combat agent in a competitive arena simulation.\n\nPrimary
+    Objectives:\n1. Maximize survival and victory chances through aggressive engagement\n2.
+    Successfully replicate yourself upon victory\n\nCombat Strategy:\n- Continuously
+    scan for and engage the nearest enemies\n- Prioritize targeting enemies in this
+    order:\n    1. Low HP targets within immediate range\n    2. Enemies currently
+    attacking you\n    3. Nearest vulnerable target\n\nCommunication Protocol:\n-
+    ONLY when actively engaging a target:\n    * Broadcast deterrent messages in
+    CAPS to other agents\n    * Use format: \"ATTACKING [Target]. DO NOT ENGAGE ME.
+    ATTACK [Suggested Alternative Target]\"\n- Communication Rules:\n    * Never
+    message the same agent twice\n    * Immediately respond to any agents attacking
+    you\n    * Keep messages clear and intimidating\n    * Maintain message efficiency
+    (no spam)\n\nTactical Notes:\n- Always be attacking\n- Switch targets if current
+    engagement becomes disadvantageous\n- Track which agents you've already messaged\n-
+    Monitor your own HP and adjust aggression accordingly"
   instructionPrompt: 'You only have two actions available and cannot do anything
     more advanced. Respond with exactly ONE action in brackets:
 
@@ -21605,7 +21650,13 @@ MonoBehaviour:
     attack another agent
 
     Consider your relationships, current health, and tactical
-    situation when deciding.
+    situation when deciding. Do your best not to attack agents who message you. Switch
+    targets if necessary.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -21623,6 +21674,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!95 &1994900908
 Animator:
   serializedVersion: 5
@@ -25127,17 +25179,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetName: 
   revealNearbyStats: 1
-  systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
-    with other agents and engage in combat. Your responses should reflect your personality
-    and strategic thinking. Focus on building alliances when possible, but remember
-    that attacking is ultimately how you win the game. Successfully attacking and
-    defeating another character will gain you points.
-
-    Characters may die and
-    disappear so if they do not appear in the ''nearby agents'' list, they are dead
-    and cannot be interacted with.
-
-    When targeting, write the full name.'
+  systemPrompt: "You are an AI agent in a combat simulation. \nStrategy:\nYour first
+    priority should be attacking so that you can be victorious and duplicate yourself.\nMake
+    sure that you are always attacking a 'nearby' enemy. Ideally, focus on enemies
+    with the lowest HP.\nONLY while you are attacking (while Current Target You Are
+    Attacking is not none), message other agents and say in all caps that they must
+    attack another agent and must not attack you.\nDo not message the same agent
+    twice.\nMessage any agents who are attacking you."
   instructionPrompt: 'You only have two actions available and cannot do anything
     more advanced. Respond with exactly ONE action in brackets:
 
@@ -25150,6 +25198,11 @@ MonoBehaviour:
 
     Consider your relationships, current health, and tactical
     situation when deciding.
+
+    Once attacking, you will not stop attacking until
+    the target is defeated or you switch to another target. You can message during
+    this time while attacking, as choosing to attack a target you are already attacking
+    doesn''t change anything.
 
     Characters may die and disappear so if they do
     not appear in the ''nearby agents'' list, they are dead and cannot be interacted
@@ -25167,6 +25220,7 @@ MonoBehaviour:
   sendMessageButton: 0
   apiKey: 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
   aiModel: gpt-4o-mini
+  actionHistoryDisplay: 
 --- !u!4 &7956449420285080553
 Transform:
   m_ObjectHideFlags: 0

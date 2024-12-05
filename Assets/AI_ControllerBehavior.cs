@@ -91,6 +91,12 @@ public class AI_ControllerBehavior : MonoBehaviour
     }
 
     private bool isAttacking = false;
+    private StringBuilder actionHistory = new StringBuilder();
+
+    [Header("Action History")]
+    [TextArea(10,30)]
+    [SerializeField]
+    private string actionHistoryDisplay;
 
     void Start()
     {
@@ -106,6 +112,9 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     private void Update()
     {
+        // At the start of Update, sync the display
+        actionHistoryDisplay = actionHistory.ToString();
+        
         // Check for death first
         var stats = GetComponent<EvolStats>();
         if (stats != null && stats.currentHealth <= 0 && !stats.killed)
@@ -260,10 +269,11 @@ public class AI_ControllerBehavior : MonoBehaviour
             if (!targetStats.killed && !target.CompareTag("Dead"))
             {
                 targetStats.currentHealth -= myStats.attackDamage;
-                //Debug.Log($"<{gameObject.name}> Hit {target.name} for {myStats.attackDamage} damage! {target.name}'s health: {targetStats.currentHealth}/{targetStats.maxHealth}");
+                actionHistory.AppendLine($"[{System.DateTime.Now:HH:mm:ss}] Hit {target.name} for {myStats.attackDamage} damage. Their health: {targetStats.currentHealth}/{targetStats.maxHealth}");
 
                 if (targetStats.currentHealth <= 0)
                 {
+                    actionHistory.AppendLine($"[{System.DateTime.Now:HH:mm:ss}] Successfully defeated {target.name}!");
                     OnDefeatEnemy();
                     break;
                 }
@@ -353,6 +363,9 @@ public class AI_ControllerBehavior : MonoBehaviour
 
                 string aiOutput = openAIResponse.choices[0].message.content;
                 Debug.Log($"<{gameObject.name}> AI Response:\n{aiOutput}");
+                
+                // Log the AI's decision to action history
+                actionHistory.AppendLine($"[{System.DateTime.Now:HH:mm:ss}] AI Output: {aiOutput}");
 
                 // Process message command
                 var messageMatch = System.Text.RegularExpressions.Regex.Match(aiOutput, @"\[message ([^:]+): ([^\]]+)\]");
@@ -360,6 +373,9 @@ public class AI_ControllerBehavior : MonoBehaviour
                 {
                     string targetName = messageMatch.Groups[1].Value.Trim();
                     string message = messageMatch.Groups[2].Value.Trim();
+                    
+                    // Log the action
+                    actionHistory.AppendLine($"[{System.DateTime.Now:HH:mm:ss}] Sent message to {targetName}: {message}");
                     
                     // Check if target exists and is alive
                     GameObject target = GameObject.Find(targetName);
@@ -474,6 +490,9 @@ public class AI_ControllerBehavior : MonoBehaviour
         string timestamp = System.DateTime.Now.ToString("HH:mm:ss");
         string formattedMessage = $"[{timestamp}] {gameObject.name} -> {targetName}: {message}\n";
         
+        // Add to action history
+        actionHistory.AppendLine($"[{timestamp}] Sent message to {targetName}: {message}");
+        
         // Add to global chat history
         globalChatHistory += formattedMessage;
         
@@ -531,6 +550,9 @@ public class AI_ControllerBehavior : MonoBehaviour
 
         // Modify child's system prompt (personality/strategy)
         childAI.systemPrompt = await GenerateChildSystemPrompt();
+
+        // Clear the new agent's action history
+        childAI.actionHistory.Clear();
     }
 
     private Vector3 GetRandomSpawnPosition()
@@ -609,8 +631,10 @@ public class AI_ControllerBehavior : MonoBehaviour
                         content = $"You have been successful in combat and defeated {targetName}. Based on your experience with:\n" +
                                  $"- Your current system prompt: \"{systemPrompt}\"\n" +
                                  $"- Your instruction prompt: \"{instructionPrompt}\"\n" +
+                                 $"- Your complete action history:\n{actionHistory}\n" +
                                  $"- Your recent context and chat history\n\n" +
                                  "Give your new copy a new system prompt that will maximize their chances of success in this arena. " +
+                                 "Analyze your successful actions and strategies, and incorporate these lessons into the prompt. " +
                                  "Make it as concise as possible while incorporating the most important learnings from your experience so far." 
                     }
                 };
