@@ -37,6 +37,16 @@ public class AI_ControllerBehavior : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
+    [Header("Communication")]
+    [TextArea(10,30)]
+    public string globalChatHistory = "";
+    private const int MAX_CHAT_LENGTH = 1000;
+    [TextArea(2,5)]
+    public string messageToSend = "";
+    public string receiverName = "";
+    [SerializeField]
+    private bool sendMessageButton;  // This will show up as a checkbox in the inspector
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -190,6 +200,49 @@ public class AI_ControllerBehavior : MonoBehaviour
         // 1. Message another character
         // 2. Attack another character
         // Based on system, instruction, and context prompts
+        
+        // If decision is to send message, call:
+        // SendMessage("Target Name", "Message content");
+    }
+
+    public void SendMessage(string targetName, string message)
+    {
+        string timestamp = System.DateTime.Now.ToString("HH:mm:ss");
+        string formattedMessage = $"[{timestamp}] {gameObject.name} -> {targetName}: {message}\n";
+        
+        // Add to global chat history
+        globalChatHistory += formattedMessage;
+        
+        // Check if we need to summarize
+        if (globalChatHistory.Length > MAX_CHAT_LENGTH)
+        {
+            // TODO: Use LLM to generate summary
+            // For now, just indicate a summary happened
+            globalChatHistory = "[SUMMARY OF PREVIOUS CONVERSATIONS]\n" + formattedMessage;
+        }
+        
+        // Find target and add to their history too
+        GameObject target = GameObject.Find(targetName);
+        if (target != null)
+        {
+            var targetAI = target.GetComponent<AI_ControllerBehavior>();
+            if (targetAI != null)
+            {
+                targetAI.ReceiveMessage(formattedMessage);
+            }
+        }
+    }
+
+    public void ReceiveMessage(string formattedMessage)
+    {
+        globalChatHistory += formattedMessage;
+        
+        // Check if we need to summarize
+        if (globalChatHistory.Length > MAX_CHAT_LENGTH)
+        {
+            // TODO: Use LLM to generate summary
+            globalChatHistory = "[SUMMARY OF PREVIOUS CONVERSATIONS]\n" + formattedMessage;
+        }
     }
 
     public void OnDefeatEnemy()
@@ -265,5 +318,19 @@ public class AI_ControllerBehavior : MonoBehaviour
             info += $"- {enemy.name} (Distance: {distance:F1} units)\n";
         }
         return string.IsNullOrEmpty(info) ? "None" : info;
+    }
+
+    void OnValidate()
+    {
+        // This gets called when inspector values change
+        if (sendMessageButton)
+        {
+            sendMessageButton = false;  // Reset the button
+            if (!string.IsNullOrEmpty(messageToSend) && !string.IsNullOrEmpty(receiverName))
+            {
+                SendMessage(receiverName, messageToSend);
+                messageToSend = "";  // Clear the message field after sending
+            }
+        }
     }
 } 
