@@ -140,7 +140,31 @@ public class AI_ControllerBehavior : MonoBehaviour
         if (!string.IsNullOrEmpty(targetName))
         {
             GameObject target = GameObject.Find(targetName);
-            if (target != null && target != gameObject)
+            if (target == null || target.CompareTag("Dead"))
+            {
+                // Stop moving if target is null or dead
+                if (agent != null && agent.enabled)
+                {
+                    agent.SetDestination(transform.position);
+                }
+                
+                // Update context prompt about dead or non-existent target
+                if (target == null)
+                {
+                    contextPrompt += $"\n{targetName} does not exist and cannot be targeted for attack.";
+                    Debug.Log($"<{gameObject.name}> {targetName} does not exist and cannot be targeted for attack.");
+                }
+                else if (target.CompareTag("Dead"))
+                {
+                    contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack.";
+                    Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack.");
+                }
+                
+                targetName = ""; // Clear the target
+                return;
+            }
+
+            if (target != gameObject)
             {
                 float distance = Vector3.Distance(transform.position, target.transform.position);
                 if (distance <= attackRange)
@@ -297,6 +321,22 @@ public class AI_ControllerBehavior : MonoBehaviour
                 {
                     string targetName = messageMatch.Groups[1].Value.Trim();
                     string message = messageMatch.Groups[2].Value.Trim();
+                    
+                    // Check if target exists and is alive
+                    GameObject target = GameObject.Find(targetName);
+                    if (target == null)
+                    {
+                        contextPrompt += $"\n{targetName} does not exist and cannot be targeted for attack or messaged.";
+                        Debug.Log($"<{gameObject.name}> {targetName} does not exist and cannot be targeted for attack or messaged.");
+                        return;
+                    }
+                    if (target.CompareTag("Dead"))
+                    {
+                        contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack or messaged.";
+                        Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack or messaged.");
+                        return;
+                    }
+
                     SendMessage(targetName, message);
                     return;
                 }
@@ -312,8 +352,8 @@ public class AI_ControllerBehavior : MonoBehaviour
                     {
                         if (target.CompareTag("Dead"))
                         {
-                            contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack.";
-                            Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack.");
+                            contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack or messaged.";
+                            Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack or messaged.");
                             return;
                         }
 
