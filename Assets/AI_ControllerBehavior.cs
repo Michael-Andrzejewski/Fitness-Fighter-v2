@@ -290,17 +290,21 @@ public class AI_ControllerBehavior : MonoBehaviour
                     return;
                 }
 
-                if (openAIResponse.choices[0].message == null)
-                {
-                    Debug.LogError($"<{gameObject.name}> No message in API response");
-                    return;
-                }
-
                 string aiOutput = openAIResponse.choices[0].message.content;
                 Debug.Log($"<{gameObject.name}> AI Response:\n{aiOutput}");
 
-                // TODO: Process the AI's response to take actions
-                // This will be implemented in a future update
+                // Process message command
+                var messageMatch = System.Text.RegularExpressions.Regex.Match(aiOutput, @"\[message ([^:]+): ([^\]]+)\]");
+                if (messageMatch.Success)
+                {
+                    string targetName = messageMatch.Groups[1].Value.Trim();
+                    string message = messageMatch.Groups[2].Value.Trim();
+                    
+                    // Send the message using existing SendMessage method
+                    SendMessage(targetName, message);
+                }
+                
+                // TODO: Process attack commands in future update
             }
         }
         catch (Exception e)
@@ -309,7 +313,52 @@ public class AI_ControllerBehavior : MonoBehaviour
         }
     }
 
-    public void SendMessage(string targetName, string message)
+    private async Task<string> SummarizeHistory()
+    {
+        try
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var messages = new List<MessageData>
+                {
+                    new MessageData { 
+                        role = "system", 
+                        content = "You are a concise summarizer. Summarize conversations in 100 words or less, focusing on key relationships and important events. Be direct and brief."
+                    },
+                    new MessageData { 
+                        role = "user", 
+                        content = $"Summarize this chat history in 100 words or less:\n\n{globalChatHistory}" 
+                    }
+                };
+
+                var request = new OpenAIRequest
+                {
+                    messages = messages
+                };
+
+                var jsonRequest = JsonUtility.ToJson(request);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(openAIEndpoint, content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
+
+                if (openAIResponse?.choices != null && openAIResponse.choices.Length > 0)
+                {
+                    return openAIResponse.choices[0].message.content;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"<{gameObject.name}> Error summarizing history: {e.Message}");
+        }
+
+        return "[Error generating summary]";
+    }
+
+    public async void SendMessage(string targetName, string message)
     {
         string timestamp = System.DateTime.Now.ToString("HH:mm:ss");
         string formattedMessage = $"[{timestamp}] {gameObject.name} -> {targetName}: {message}\n";
@@ -320,9 +369,8 @@ public class AI_ControllerBehavior : MonoBehaviour
         // Check if we need to summarize
         if (globalChatHistory.Length > MAX_CHAT_LENGTH)
         {
-            // TODO: Use LLM to generate summary
-            // For now, just indicate a summary happened
-            globalChatHistory = "[SUMMARY OF PREVIOUS CONVERSATIONS]\n" + formattedMessage;
+            string summary = await SummarizeHistory();
+            globalChatHistory = $"[SUMMARY: {summary}]\n\n{formattedMessage}";
         }
         
         // Find target and add to their history too
@@ -337,15 +385,15 @@ public class AI_ControllerBehavior : MonoBehaviour
         }
     }
 
-    public void ReceiveMessage(string formattedMessage)
+    public async void ReceiveMessage(string formattedMessage)
     {
         globalChatHistory += formattedMessage;
         
         // Check if we need to summarize
         if (globalChatHistory.Length > MAX_CHAT_LENGTH)
         {
-            // TODO: Use LLM to generate summary
-            globalChatHistory = "[SUMMARY OF PREVIOUS CONVERSATIONS]\n" + formattedMessage;
+            string summary = await SummarizeHistory();
+            globalChatHistory = $"[SUMMARY: {summary}]\n\n{formattedMessage}";
         }
     }
 
