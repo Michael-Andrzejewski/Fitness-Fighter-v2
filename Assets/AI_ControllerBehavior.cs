@@ -7,11 +7,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System;
+using System.Linq;
 
 public class AI_ControllerBehavior : MonoBehaviour
 {
     [Header("AI State")]
     public string targetName;
+    private StringBuilder persistentContext = new StringBuilder();
 
     [Header("AI Prompts")]
     [TextArea(3, 10)]
@@ -30,7 +32,6 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     [Header("Reproduction")]
     public GameObject aiAgentPrefab;
-    private static HashSet<string> usedNames = new HashSet<string>();
 
     // Reference to nearby entities
     private List<AI_ControllerBehavior> nearbyAgents = new List<AI_ControllerBehavior>();
@@ -152,15 +153,15 @@ public class AI_ControllerBehavior : MonoBehaviour
                     agent.SetDestination(transform.position);
                 }
                 
-                // Update context prompt about dead or non-existent target
+                // Update persistent context about dead or non-existent target
                 if (target == null)
                 {
-                    contextPrompt += $"\n{targetName} does not exist and cannot be targeted for attack.";
+                    persistentContext.AppendLine($"{targetName} does not exist and cannot be targeted for attack.");
                     Debug.Log($"<{gameObject.name}> {targetName} does not exist and cannot be targeted for attack.");
                 }
                 else if (target.CompareTag("Dead"))
                 {
-                    contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack.";
+                    persistentContext.AppendLine($"{targetName} is dead and cannot be targeted for attack.");
                     Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack.");
                 }
                 
@@ -284,8 +285,9 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     private void UpdateContextPrompt()
     {
-        // Start with the agent's name and global chat history
+        // Start with the agent's name, persistent context, and global chat history
         contextPrompt = $"Your Name is {gameObject.name}\n\n" +
+                        $"Important Context:\n{persistentContext}\n\n" +
                         $"Global Chat History:\n{globalChatHistory}\n\n" +
                         $"Nearby Agents:\n{GetNearbyAgentsInfo()}\n" +
                         $"Attackers:\n{GetAttackersInfo()}\n\n" +
@@ -358,13 +360,13 @@ public class AI_ControllerBehavior : MonoBehaviour
                     GameObject target = GameObject.Find(targetName);
                     if (target == null)
                     {
-                        contextPrompt += $"\n{targetName} does not exist and cannot be targeted for attack or messaged.";
+                        persistentContext.AppendLine($"{targetName} does not exist and cannot be targeted for attack or messaged.");
                         Debug.Log($"<{gameObject.name}> {targetName} does not exist and cannot be targeted for attack or messaged.");
                         return;
                     }
                     if (target.CompareTag("Dead"))
                     {
-                        contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack or messaged.";
+                        persistentContext.AppendLine($"{targetName} is dead and cannot be targeted for attack or messaged.");
                         Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack or messaged.");
                         return;
                     }
@@ -384,7 +386,7 @@ public class AI_ControllerBehavior : MonoBehaviour
                     {
                         if (target.CompareTag("Dead"))
                         {
-                            contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack or messaged.";
+                            persistentContext.AppendLine($"{targetName} is dead and cannot be targeted for attack or messaged.");
                             Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack or messaged.");
                             return;
                         }
@@ -506,14 +508,20 @@ public class AI_ControllerBehavior : MonoBehaviour
         GameObject childAgent = Instantiate(aiAgentPrefab, GetRandomSpawnPosition(), Quaternion.identity);
         AI_ControllerBehavior childAI = childAgent.GetComponent<AI_ControllerBehavior>();
         
+        // Set child's health to full
+        var childStats = childAgent.GetComponent<EvolStats>();
+        if (childStats != null)
+        {
+            childStats.currentHealth = childStats.maxHealth;
+        }
+        
         // Generate unique name
         string childName = await GenerateUniqueName();
-        usedNames.Add(childName);
         childAgent.name = childName;
 
         // Modify child's system prompt (personality/strategy)
         // This could be done through LLM interaction
-        childAI.systemPrompt = GenerateChildSystemPrompt();
+        childAI.systemPrompt = await GenerateChildSystemPrompt();
     }
 
     private Vector3 GetRandomSpawnPosition()
@@ -531,14 +539,20 @@ public class AI_ControllerBehavior : MonoBehaviour
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
 
+                // Find all AI agents and get their names (including dead ones)
+                var allAgents = FindObjectsOfType<AI_ControllerBehavior>();
+                var existingNames = allAgents
+                    .Select(agent => agent.name)
+                    .ToList();
+                string existingNamesStr = string.Join(", ", existingNames);
+
                 var messages = new List<MessageData>
                 {
-                    new MessageData { role = "system", content = systemPrompt },
-                    new MessageData { role = "user", content = instructionPrompt },
+                    new MessageData { role = "system", content = "Give your new copy a new name that is unique and human-sounding." },
                     new MessageData { role = "user", content = contextPrompt },
                     new MessageData { 
                         role = "user", 
-                        content = $"Congratulations, you defeated '{targetName}'. Now, a copy of yourself will be created to replace them. Respond only with the name of your new copy (it must be unique)." 
+                        content = $"Congratulations, you defeated '{targetName}'. Now, a copy of yourself will be created to replace them. The following names are already in use: [{existingNamesStr}]. Respond only with a new, unique, human-sounding name for your copy that is not in this list. Give your copies the same last name as you." 
                     }
                 };
 
@@ -567,11 +581,53 @@ public class AI_ControllerBehavior : MonoBehaviour
         return "UnnamedChild";
     }
 
-    private string GenerateChildSystemPrompt()
+    private async Task<string> GenerateChildSystemPrompt()
     {
-        // Logic to generate new system prompt for child
-        // Could use LLM to modify parent's prompt
-        return "Modified system prompt";
+        try
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var messages = new List<MessageData>
+                {
+                    new MessageData { role = "system", content = "Give your new copy a new system prompt that will maximize their chances of success in this arena." },
+                    new MessageData { role = "user", content = instructionPrompt },
+                    new MessageData { role = "user", content = contextPrompt },
+                    new MessageData { 
+                        role = "user", 
+                        content = $"You have been successful in combat and defeated {targetName}. Based on your experience with:\n" +
+                                 $"- Your current system prompt: \"{systemPrompt}\"\n" +
+                                 $"- Your instruction prompt: \"{instructionPrompt}\"\n" +
+                                 $"- Your recent context and chat history\n\n" +
+                                 "Give your new copy a new system prompt that will maximize their chances of success in this arena. " +
+                                 "Make it as concise as possible while incorporating the most important learnings from your experience so far." 
+                    }
+                };
+
+                var request = new OpenAIRequest
+                {
+                    messages = messages
+                };
+
+                var jsonRequest = JsonUtility.ToJson(request);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(openAIEndpoint, content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
+
+                if (openAIResponse?.choices != null && openAIResponse.choices.Length > 0)
+                {
+                    return openAIResponse.choices[0].message.content.Trim();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"<{gameObject.name}> Error generating child system prompt: {e.Message}");
+        }
+
+        return "Default system prompt";
     }
 
     private string GetNearbyAgentsInfo()
