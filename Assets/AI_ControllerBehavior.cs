@@ -11,7 +11,6 @@ using System;
 public class AI_ControllerBehavior : MonoBehaviour
 {
     [Header("AI State")]
-    public bool isAttacking = false;
     public string targetName;
 
     [Header("AI Prompts")]
@@ -138,7 +137,7 @@ public class AI_ControllerBehavior : MonoBehaviour
         }
 
         // Handle movement and attacking
-        if (!string.IsNullOrEmpty(targetName) && !isAttacking)
+        if (!string.IsNullOrEmpty(targetName))
         {
             GameObject target = GameObject.Find(targetName);
             if (target != null && target != gameObject)
@@ -158,10 +157,8 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     IEnumerator Attack(GameObject target)
     {
-        if (isAttacking || target == null || target == gameObject)
+        if (target == null || target == gameObject)
             yield break;
-
-        isAttacking = true;
 
         while (target != null)
         {
@@ -226,7 +223,6 @@ public class AI_ControllerBehavior : MonoBehaviour
             animator.SetBool("isPunching", false);
         }
 
-        isAttacking = false;
         targetName = "";
     }
 
@@ -312,8 +308,15 @@ public class AI_ControllerBehavior : MonoBehaviour
                     string targetName = attackMatch.Groups[1].Value.Trim();
                     Debug.Log($"<{gameObject.name}> Attempting to attack {targetName}");
                     var target = GameObject.Find(targetName);
-                    if (target != null && target.CompareTag("Enemy") && !target.CompareTag("Dead"))
+                    if (target != null)
                     {
+                        if (target.CompareTag("Dead"))
+                        {
+                            contextPrompt += $"\n{targetName} is dead and cannot be targeted for attack.";
+                            Debug.Log($"<{gameObject.name}> {targetName} is dead and cannot be targeted for attack.");
+                            return;
+                        }
+
                         EvolStats targetStats = target.GetComponent<EvolStats>();
                         if (targetStats != null && targetStats.currentHealth > 0)
                         {
@@ -425,26 +428,71 @@ public class AI_ControllerBehavior : MonoBehaviour
         }
     }
 
-    public void OnDefeatEnemy()
+    public async void OnDefeatEnemy()
     {
         // Create child AI
-        GameObject childAgent = Instantiate(aiAgentPrefab, transform.position, Quaternion.identity);
+        GameObject childAgent = Instantiate(aiAgentPrefab, GetRandomSpawnPosition(), Quaternion.identity);
         AI_ControllerBehavior childAI = childAgent.GetComponent<AI_ControllerBehavior>();
         
         // Generate unique name
-        string childName = GenerateUniqueName();
+        string childName = await GenerateUniqueName();
         usedNames.Add(childName);
-        
+        childAgent.name = childName;
+
         // Modify child's system prompt (personality/strategy)
         // This could be done through LLM interaction
         childAI.systemPrompt = GenerateChildSystemPrompt();
     }
 
-    private string GenerateUniqueName()
+    private Vector3 GetRandomSpawnPosition()
     {
-        // Logic to generate unique name
-        // Could use LLM or predetermined list
-        return "UniqueNameHere";
+        Vector3 randomPosition = transform.position + UnityEngine.Random.insideUnitSphere * 50;
+        NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, 50, NavMesh.AllAreas);
+        return hit.position;
+    }
+
+    private async Task<string> GenerateUniqueName()
+    {
+        try
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var messages = new List<MessageData>
+                {
+                    new MessageData { role = "system", content = systemPrompt },
+                    new MessageData { role = "user", content = instructionPrompt },
+                    new MessageData { role = "user", content = contextPrompt },
+                    new MessageData { 
+                        role = "user", 
+                        content = $"Congratulations, you defeated '{targetName}'. Now, a copy of yourself will be created to replace them. Respond only with the name of your new copy (it must be unique)." 
+                    }
+                };
+
+                var request = new OpenAIRequest
+                {
+                    messages = messages
+                };
+
+                var jsonRequest = JsonUtility.ToJson(request);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(openAIEndpoint, content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
+
+                if (openAIResponse?.choices != null && openAIResponse.choices.Length > 0)
+                {
+                    return openAIResponse.choices[0].message.content.Trim();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"<{gameObject.name}> Error generating unique name: {e.Message}");
+        }
+
+        return "UnnamedChild";
     }
 
     private string GenerateChildSystemPrompt()
@@ -483,7 +531,7 @@ public class AI_ControllerBehavior : MonoBehaviour
         string info = "";
         foreach (var agent in nearbyAgents)
         {
-            if (agent.isAttacking && agent.targetName == this.name)
+            if (agent.targetName == this.name)
             {
                 info += $"- {agent.name}\n";
             }
