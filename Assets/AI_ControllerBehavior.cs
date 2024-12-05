@@ -256,7 +256,7 @@ public class AI_ControllerBehavior : MonoBehaviour
             if (!targetStats.killed && !target.CompareTag("Dead"))
             {
                 targetStats.currentHealth -= myStats.attackDamage;
-                Debug.Log($"<{gameObject.name}> Hit {target.name} for {myStats.attackDamage} damage! {target.name}'s health: {targetStats.currentHealth}/{targetStats.maxHealth}");
+                //Debug.Log($"<{gameObject.name}> Hit {target.name} for {myStats.attackDamage} damage! {target.name}'s health: {targetStats.currentHealth}/{targetStats.maxHealth}");
 
                 if (targetStats.currentHealth <= 0)
                 {
@@ -312,7 +312,7 @@ public class AI_ControllerBehavior : MonoBehaviour
         promptBuilder.AppendLine(contextPrompt);
 
         // Print the full prompt
-        Debug.Log($"<{gameObject.name}> Full AI Prompt:\n{promptBuilder}");
+        //Debug.Log($"<{gameObject.name}> Full AI Prompt:\n{promptBuilder}");
 
         try
         {
@@ -336,7 +336,7 @@ public class AI_ControllerBehavior : MonoBehaviour
                 var response = await client.PostAsync(openAIEndpoint, content);
                 var responseString = await response.Content.ReadAsStringAsync();
                 
-                Debug.Log($"<{gameObject.name}> Raw API Response: {responseString}"); // Debug line
+                //Debug.Log($"<{gameObject.name}> Raw API Response: {responseString}"); // Debug line
                 
                 var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
                 
