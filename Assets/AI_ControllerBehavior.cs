@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using System.Collections;
 using System.Text;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Text.Json;
+using System;
 
 public class AI_ControllerBehavior : MonoBehaviour
 {
@@ -12,11 +16,14 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     [Header("AI Prompts")]
     [TextArea(3, 10)]
-    public string systemPrompt = "Default personality and strategy";
+    public string systemPrompt = "You are an AI agent in a combat simulation. You can communicate with other agents and engage in combat. Your responses should reflect your personality and strategic thinking. Focus on building alliances when possible, but be ready to defend yourself.";
     [TextArea(3, 10)]
-    public string instructionPrompt;
+    public string instructionPrompt = "You may take ONE of the following actions. Respond with exactly ONE action in brackets:\n" +
+        "[message agentName: Your message] - to communicate with another agent\n" +
+        "[attack agentName] - to engage in combat with an agent\n" +
+        "Consider your relationships, current health, and tactical situation when deciding.";
     [TextArea(3, 10)]
-    public string contextPrompt;
+    public string contextPrompt = "";
 
     [Header("AI Behavior")]
     public float actionCooldown = 10f;
@@ -47,6 +54,38 @@ public class AI_ControllerBehavior : MonoBehaviour
     public string receiverName = "";
     [SerializeField]
     private bool sendMessageButton;  // This will show up as a checkbox in the inspector
+
+    [Header("OpenAI Configuration")]
+    private readonly string openAIEndpoint = "https://api.openai.com/v1/chat/completions";
+    [SerializeField, Tooltip("Your OpenAI API Key")]
+    private string apiKey;
+
+    [System.Serializable]
+    private class OpenAIRequest
+    {
+        public string model = "gpt-4o-mini";
+        public List<MessageData> messages;
+        public float temperature = 0.7f;
+    }
+
+    [System.Serializable]
+    private class MessageData
+    {
+        public string role;
+        public string content;
+    }
+
+    [System.Serializable]
+    private class OpenAIResponse
+    {
+        public Choice[] choices;
+    }
+
+    [System.Serializable]
+    private class Choice
+    {
+        public MessageData message;
+    }
 
     void Start()
     {
@@ -206,15 +245,68 @@ public class AI_ControllerBehavior : MonoBehaviour
         }
     }
 
-    private void DecideAction()
+    private async void DecideAction()
     {
-        // Use LLM to decide whether to:
-        // 1. Message another character
-        // 2. Attack another character
-        // Based on system, instruction, and context prompts
-        
-        // If decision is to send message, call:
-        // SendMessage("Target Name", "Message content");
+        // Build the complete prompt
+        StringBuilder promptBuilder = new StringBuilder();
+        promptBuilder.AppendLine(systemPrompt);
+        promptBuilder.AppendLine("\nInstructions:");
+        promptBuilder.AppendLine(instructionPrompt);
+        promptBuilder.AppendLine("\nContext:");
+        promptBuilder.AppendLine(contextPrompt);
+
+        // Print the full prompt
+        Debug.Log($"<{gameObject.name}> Full AI Prompt:\n{promptBuilder}");
+
+        try
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var messages = new List<MessageData>
+                {
+                    new MessageData { role = "system", content = systemPrompt },
+                    new MessageData { role = "user", content = $"{instructionPrompt}\n\n{contextPrompt}" }
+                };
+
+                var request = new OpenAIRequest
+                {
+                    messages = messages
+                };
+
+                var jsonRequest = JsonUtility.ToJson(request);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(openAIEndpoint, content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                
+                Debug.Log($"<{gameObject.name}> Raw API Response: {responseString}"); // Debug line
+                
+                var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
+                
+                if (openAIResponse == null || openAIResponse.choices == null || openAIResponse.choices.Length == 0)
+                {
+                    Debug.LogError($"<{gameObject.name}> Invalid response format from API");
+                    return;
+                }
+
+                if (openAIResponse.choices[0].message == null)
+                {
+                    Debug.LogError($"<{gameObject.name}> No message in API response");
+                    return;
+                }
+
+                string aiOutput = openAIResponse.choices[0].message.content;
+                Debug.Log($"<{gameObject.name}> AI Response:\n{aiOutput}");
+
+                // TODO: Process the AI's response to take actions
+                // This will be implemented in a future update
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"<{gameObject.name}> Error in DecideAction: {e.Message}\nStack Trace: {e.StackTrace}");
+        }
     }
 
     public void SendMessage(string targetName, string message)

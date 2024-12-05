@@ -4952,8 +4952,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isAttacking: 0
   targetName: 
-  systemPrompt: Default personality and strategy
-  instructionPrompt: 
+  systemPrompt: You are an AI agent in a combat simulation. You can communicate with
+    other agents and engage in combat. Your responses should reflect your personality
+    and strategic thinking. Focus on building alliances when possible, but be ready
+    to defend yourself.
+  instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
+    ONE action in brackets:
+
+
+    [message agentName: Your message] - to communicate
+    with another agent
+
+    [attack agentName] - to attack another agent
+
+    Consider
+    your relationships, current health, and tactical situation when deciding.'
   contextPrompt: 
   actionCooldown: 10
   aiAgentPrefab: {fileID: 992141421}
@@ -4964,6 +4977,7 @@ MonoBehaviour:
   messageToSend: 
   receiverName: 
   sendMessageButton: 0
+  apiKey: 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
 --- !u!95 &992141426
 Animator:
   serializedVersion: 5
@@ -8016,8 +8030,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isAttacking: 0
   targetName: 
-  systemPrompt: Default personality and strategy
-  instructionPrompt: 
+  systemPrompt: You are an AI agent in a combat simulation. You can communicate with
+    other agents and engage in combat. Your responses should reflect your personality
+    and strategic thinking. Focus on building alliances when possible, but be ready
+    to defend yourself.
+  instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
+    ONE action in brackets:
+
+
+    [message agentName: Your message] - to communicate
+    with another agent
+
+    [attack agentName] - to attack another agent
+
+    Consider
+    your relationships, current health, and tactical situation when deciding.'
   contextPrompt: 
   actionCooldown: 10
   aiAgentPrefab: {fileID: 0}
@@ -8028,6 +8055,7 @@ MonoBehaviour:
   messageToSend: 
   receiverName: 
   sendMessageButton: 0
+  apiKey: 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
 --- !u!95 &1745866272
 Animator:
   serializedVersion: 5
@@ -9282,8 +9310,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isAttacking: 0
   targetName: 
-  systemPrompt: Default personality and strategy
-  instructionPrompt: 
+  systemPrompt: You are an AI agent in a combat simulation. You can communicate with
+    other agents and engage in combat. Your responses should reflect your personality
+    and strategic thinking. Focus on building alliances when possible, but be ready
+    to defend yourself.
+  instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
+    ONE action in brackets:
+
+
+    [message agentName: Your message] - to communicate
+    with another agent
+
+    [attack agentName] - to attack another agent
+
+    Consider
+    your relationships, current health, and tactical situation when deciding.'
   contextPrompt: 
   actionCooldown: 10
   aiAgentPrefab: {fileID: 1994900903}
@@ -9294,6 +9335,7 @@ MonoBehaviour:
   messageToSend: 
   receiverName: 
   sendMessageButton: 0
+  apiKey: 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
 --- !u!95 &1994900908
 Animator:
   serializedVersion: 5
@@ -11867,8 +11909,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isAttacking: 0
   targetName: 
-  systemPrompt: Default personality and strategy
-  instructionPrompt: 
+  systemPrompt: You are an AI agent in a combat simulation. You can communicate with
+    other agents and engage in combat. Your responses should reflect your personality
+    and strategic thinking. Focus on building alliances when possible, but be ready
+    to defend yourself.
+  instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
+    ONE action in brackets:
+
+
+    [message agentName: Your message] - to communicate
+    with another agent
+
+    [attack agentName] - to attack another agent
+
+    Consider
+    your relationships, current health, and tactical situation when deciding.'
   contextPrompt: 
   actionCooldown: 10
   aiAgentPrefab: {fileID: 7956449420209920692}
@@ -11879,6 +11934,7 @@ MonoBehaviour:
   messageToSend: 
   receiverName: 
   sendMessageButton: 0
+  apiKey: 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
 --- !u!4 &7956449420285080553
 Transform:
   m_ObjectHideFlags: 0
