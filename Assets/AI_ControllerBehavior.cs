@@ -14,6 +14,8 @@ public class AI_ControllerBehavior : MonoBehaviour
     [Header("AI State")]
     public string targetName;
     private StringBuilder persistentContext = new StringBuilder();
+    [SerializeField]
+    private bool revealNearbyStats = false;
 
     [Header("AI Prompts")]
     [TextArea(3, 10)]
@@ -58,11 +60,13 @@ public class AI_ControllerBehavior : MonoBehaviour
     private readonly string openAIEndpoint = "https://api.openai.com/v1/chat/completions";
     [SerializeField, Tooltip("Your OpenAI API Key")]
     private string apiKey;
+    [SerializeField, Tooltip("The AI model to use for this agent")]
+    private string aiModel = "gpt-4o-mini";
 
     [System.Serializable]
     private class OpenAIRequest
     {
-        public string model = "gpt-4o-mini";
+        public string model;
         public List<MessageData> messages;
         public float temperature = 0.7f;
     }
@@ -328,6 +332,7 @@ public class AI_ControllerBehavior : MonoBehaviour
 
                 var request = new OpenAIRequest
                 {
+                    model = aiModel,
                     messages = messages
                 };
 
@@ -434,12 +439,13 @@ public class AI_ControllerBehavior : MonoBehaviour
                     },
                     new MessageData { 
                         role = "user", 
-                        content = $"Summarize this chat history in 100 words or less:\n\n{globalChatHistory}" 
+                        content = $"Summarize this chat history in 100 words or less:\n\n{globalChatHistory}.\n\nCharacters that are not in this list can be ignored or left out of the summary:\n{GetNearbyAgentsInfo()}.\nFocus on the newest information in the chat first." 
                     }
                 };
 
                 var request = new OpenAIRequest
                 {
+                    model = aiModel,
                     messages = messages
                 };
 
@@ -519,8 +525,11 @@ public class AI_ControllerBehavior : MonoBehaviour
         string childName = await GenerateUniqueName();
         childAgent.name = childName;
 
+        // Broadcast the defeat and spawn message to all agents
+        string defeatMessage = $"{gameObject.name} defeated {targetName} in combat and spawned a child, {childName}";
+        BroadcastToAllAgents(defeatMessage);
+
         // Modify child's system prompt (personality/strategy)
-        // This could be done through LLM interaction
         childAI.systemPrompt = await GenerateChildSystemPrompt();
     }
 
@@ -558,6 +567,7 @@ public class AI_ControllerBehavior : MonoBehaviour
 
                 var request = new OpenAIRequest
                 {
+                    model = aiModel,
                     messages = messages
                 };
 
@@ -607,6 +617,7 @@ public class AI_ControllerBehavior : MonoBehaviour
 
                 var request = new OpenAIRequest
                 {
+                    model = aiModel,
                     messages = messages
                 };
 
@@ -649,6 +660,18 @@ public class AI_ControllerBehavior : MonoBehaviour
             // Calculate distance and add to info string
             float distance = Vector3.Distance(transform.position, agent.transform.position);
             info.AppendLine($"- {agent.name} (Distance: {distance:F1} units)");
+
+            // Add stats information if enabled
+            if (revealNearbyStats)
+            {
+                var stats = agent.GetComponent<EvolStats>();
+                if (stats != null)
+                {
+                    info.AppendLine($"  HP: {stats.currentHealth}/{stats.maxHealth}, " +
+                                  $"Damage: {stats.attackDamage}, " +
+                                  $"Attack Speed: {stats.attackSpeed}");
+                }
+            }
         }
         
         return info.Length == 0 ? "None" : info.ToString();
@@ -699,6 +722,23 @@ public class AI_ControllerBehavior : MonoBehaviour
             {
                 SendMessage(receiverName, messageToSend);
                 messageToSend = "";  // Clear the message field after sending
+            }
+        }
+    }
+
+    // Add this new helper method
+    private void BroadcastToAllAgents(string message)
+    {
+        string timestamp = System.DateTime.Now.ToString("HH:mm:ss");
+        string formattedMessage = $"[{timestamp}] SYSTEM: {message}\n";
+        
+        // Find all AI agents and update their chat history
+        var allAgents = FindObjectsOfType<AI_ControllerBehavior>();
+        foreach (var agent in allAgents)
+        {
+            if (agent != null)
+            {
+                agent.ReceiveMessage(formattedMessage);
             }
         }
     }

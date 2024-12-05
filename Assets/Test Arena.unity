@@ -1553,6 +1553,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 0
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -1583,7 +1584,7 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 129576542}
   attackRange: 2
   attackSpeed: 1
@@ -1592,6 +1593,7 @@ MonoBehaviour:
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &129576547
 Animator:
   serializedVersion: 5
@@ -3274,6 +3276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 0
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -3304,7 +3307,7 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 288532384}
   attackRange: 2
   attackSpeed: 1
@@ -3313,6 +3316,7 @@ MonoBehaviour:
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &288532389
 Animator:
   serializedVersion: 5
@@ -5292,6 +5296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 0
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -5322,7 +5327,7 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 0}
   attackRange: 2
   attackSpeed: 1
@@ -5331,6 +5336,7 @@ MonoBehaviour:
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &419317706
 Animator:
   serializedVersion: 5
@@ -8797,6 +8803,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 0
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -8827,20 +8834,16 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 723695532}
   attackRange: 2
   attackSpeed: 1
-  globalChatHistory: '[02:22:51] Sam -> Michael: I appreciate your follow-up, Michael.
-    I agree that we should form a solid strategy together. Let''s focus on Clare
-    as our first target. Her proximity to us gives us an advantage. What are your
-    thoughts on the best way to approach this?
-
-'
+  globalChatHistory: 
   messageToSend: 
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &723695537
 Animator:
   serializedVersion: 5
@@ -9873,7 +9876,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e85bf72136594d41bfd9759583ab890, type: 2}
+  - {fileID: 2100000, guid: 3695720e28a0d9a4c8b12edcca5824e6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12137,6 +12140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 1
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -12167,7 +12171,7 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 992141421}
   attackRange: 2
   attackSpeed: 1
@@ -12176,6 +12180,7 @@ MonoBehaviour:
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &992141426
 Animator:
   serializedVersion: 5
@@ -15774,7 +15779,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e85bf72136594d41bfd9759583ab890, type: 2}
+  - {fileID: 2100000, guid: 3695720e28a0d9a4c8b12edcca5824e6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -18511,7 +18516,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e85bf72136594d41bfd9759583ab890, type: 2}
+  - {fileID: 2100000, guid: 3695720e28a0d9a4c8b12edcca5824e6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -18784,6 +18789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 1
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -18814,7 +18820,7 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 0}
   attackRange: 2
   attackSpeed: 1
@@ -18823,6 +18829,7 @@ MonoBehaviour:
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &1745866272
 Animator:
   serializedVersion: 5
@@ -21575,6 +21582,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 1
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -21605,7 +21613,7 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 1994900903}
   attackRange: 2
   attackSpeed: 1
@@ -21614,6 +21622,7 @@ MonoBehaviour:
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!95 &1994900908
 Animator:
   serializedVersion: 5
@@ -22769,7 +22778,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e85bf72136594d41bfd9759583ab890, type: 2}
+  - {fileID: 2100000, guid: 3695720e28a0d9a4c8b12edcca5824e6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -25117,6 +25126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetName: 
+  revealNearbyStats: 1
   systemPrompt: 'You are an AI agent in a combat simulation. You can communicate
     with other agents and engage in combat. Your responses should reflect your personality
     and strategic thinking. Focus on building alliances when possible, but remember
@@ -25147,20 +25157,16 @@ MonoBehaviour:
 
     When targeting, write the full name.'
   contextPrompt: 
-  actionCooldown: 10
+  actionCooldown: 1
   aiAgentPrefab: {fileID: 7956449420209920692}
   attackRange: 2
   attackSpeed: 1
-  globalChatHistory: '[02:22:51] Sam -> Michael: I appreciate your follow-up, Michael.
-    I agree that we should form a solid strategy together. Let''s focus on Clare
-    as our first target. Her proximity to us gives us an advantage. What are your
-    thoughts on the best way to approach this?
-
-'
+  globalChatHistory: 
   messageToSend: 
   receiverName: 
   sendMessageButton: 0
   apiKey: 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
+  aiModel: gpt-4o-mini
 --- !u!4 &7956449420285080553
 Transform:
   m_ObjectHideFlags: 0
