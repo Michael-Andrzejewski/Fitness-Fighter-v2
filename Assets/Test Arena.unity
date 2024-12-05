@@ -9286,7 +9286,7 @@ MonoBehaviour:
   instructionPrompt: 
   contextPrompt: 
   actionCooldown: 10
-  aiAgentPrefab: {fileID: 0}
+  aiAgentPrefab: {fileID: 1994900903}
   attackRange: 2
   attackSpeed: 1
   attackDamage: 1

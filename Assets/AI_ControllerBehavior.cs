@@ -52,6 +52,12 @@ public class AI_ControllerBehavior : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+
+        // Set the AI agent prefab to itself if not already assigned
+        if (aiAgentPrefab == null)
+        {
+            aiAgentPrefab = gameObject;
+        }
     }
 
     private void Update()
@@ -189,8 +195,8 @@ public class AI_ControllerBehavior : MonoBehaviour
     {
         // Build context about nearby entities, attackers, and current target
         contextPrompt = $"Nearby Agents:\n{GetNearbyAgentsInfo()}\n" +
-                       $"Attackers:\n{GetAttackersInfo()}\n" +
-                       $"Current Target You Are Attacking: {targetName}";
+                       $"Attackers:\n{GetAttackersInfo()}\n\n" +
+                       $"Current Target You Are Attacking:\n{(string.IsNullOrEmpty(targetName) ? "None" : targetName)}";
 
         // Only include allies and enemies info if not tagged as Enemy
         if (!gameObject.CompareTag("Enemy"))
