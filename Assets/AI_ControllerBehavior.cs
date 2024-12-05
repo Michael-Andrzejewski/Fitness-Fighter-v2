@@ -2,9 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using System.Collections;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 public class AI_ControllerBehavior : MonoBehaviour
 {
@@ -50,52 +47,10 @@ public class AI_ControllerBehavior : MonoBehaviour
     [SerializeField]
     private bool sendMessageButton;  // This will show up as a checkbox in the inspector
 
-    [Header("AI Control")]
-    public bool aiActive = false;
-
-    // OpenAI Configuration
-    private readonly string openAIEndpoint = "https://api.openai.com/v1/chat/completions";
-    [SerializeField, Tooltip("Your OpenAI API Key")]
-    private string apiKey;
-    [SerializeField, Range(0.5f, 20f)]
-    private float aiThinkingInterval = 2f;
-
-    [System.Serializable]
-    private class OpenAIRequest
-    {
-        public string model = "gpt-4o-mini";
-        public List<MessageData> messages;
-        public float temperature = 0.7f;
-    }
-
-    [System.Serializable]
-    private class MessageData
-    {
-        public string role;
-        public string content;
-    }
-
-    [System.Serializable]
-    private class OpenAIResponse
-    {
-        public Choice[] choices;
-    }
-
-    [System.Serializable]
-    private class Choice
-    {
-        public MessageData message;
-    }
-
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        
-        if (aiActive)
-        {
-            StartCoroutine(AIDecisionLoop());
-        }
     }
 
     private void Update()
@@ -377,137 +332,5 @@ public class AI_ControllerBehavior : MonoBehaviour
                 messageToSend = "";  // Clear the message field after sending
             }
         }
-    }
-
-    IEnumerator AIDecisionLoop()
-    {
-        while (aiActive)
-        {
-            var stats = GetComponent<EvolStats>();
-            if (stats != null && stats.currentHealth > 0)
-            {
-                yield return new WaitForSeconds(aiThinkingInterval);
-                _ = MakeAIDecision();
-            }
-            yield return null;
-        }
-    }
-
-    async Task MakeAIDecision()
-    {
-        UpdateContextPrompt(); // This already exists in your code
-        string prompt = GeneratePrompt();
-        Debug.Log($"<{gameObject.name}> AI Prompt:\n{prompt}");
-        string action = await GetAIResponse(prompt);
-        Debug.Log($"<{gameObject.name}> AI Output: {action}");
-        ProcessAIAction(action);
-    }
-
-    async Task<string> GetAIResponse(string prompt)
-    {
-        using (var client = new HttpClient())
-        {
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-
-            var messages = new List<MessageData>
-            {
-                new MessageData { role = "system", content = systemPrompt }
-            };
-
-            // Add message history for context
-            string[] chatLines = globalChatHistory.Split('\n');
-            foreach (string line in chatLines)
-            {
-                if (!string.IsNullOrEmpty(line))
-                {
-                    messages.Add(new MessageData { role = "user", content = line });
-                }
-            }
-
-            // Add current prompt
-            messages.Add(new MessageData { role = "user", content = prompt });
-
-            var request = new OpenAIRequest
-            {
-                messages = messages
-            };
-
-            var jsonRequest = JsonUtility.ToJson(request);
-            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(openAIEndpoint, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-            var openAIResponse = JsonUtility.FromJson<OpenAIResponse>(responseString);
-
-            return openAIResponse.choices[0].message.content;
-        }
-    }
-
-    private void ProcessAIAction(string action)
-    {
-        // Parse message command
-        var messageMatch = System.Text.RegularExpressions.Regex.Match(action, @"\[message ([^:]+): ([^\]]+)\]");
-        if (messageMatch.Success)
-        {
-            string targetName = messageMatch.Groups[1].Value;
-            string message = messageMatch.Groups[2].Value;
-            SendMessage(targetName, message);
-            return;
-        }
-
-        // Parse attack command
-        var attackMatch = System.Text.RegularExpressions.Regex.Match(action, @"\[attack ([^\]]+)\]");
-        if (attackMatch.Success)
-        {
-            targetName = attackMatch.Groups[1].Value;
-            Debug.Log($"<{gameObject.name}> Attempting to attack {targetName}");
-        }
-    }
-
-    private string GeneratePrompt()
-    {
-        StringBuilder prompt = new StringBuilder();
-        
-        // Add basic info about self
-        prompt.AppendLine($"You are {gameObject.name}. Your current state:");
-        var stats = GetComponent<EvolStats>();
-        if (stats != null)
-        {
-            prompt.AppendLine($"Health: {stats.currentHealth}/{stats.maxHealth}");
-            prompt.AppendLine($"Attack Damage: {attackDamage}");
-        }
-
-        // Add info about current target
-        if (!string.IsNullOrEmpty(targetName))
-        {
-            prompt.AppendLine($"\nCurrent Target: {targetName}");
-        }
-
-        // Add info about nearby entities
-        prompt.AppendLine("\nNearby Agents:");
-        foreach (var agent in nearbyAgents)
-        {
-            if (agent != null && agent != gameObject)
-            {
-                float distance = Vector3.Distance(transform.position, agent.transform.position);
-                var agentStats = agent.GetComponent<EvolStats>();
-                if (agentStats != null)
-                {
-                    prompt.AppendLine($"- {agent.name} (Health: {agentStats.currentHealth}/{agentStats.maxHealth}, Distance: {distance:F1})");
-                }
-            }
-        }
-
-        // Add recent chat history
-        if (!string.IsNullOrEmpty(globalChatHistory))
-        {
-            prompt.AppendLine("\nRecent Messages:");
-            prompt.AppendLine(globalChatHistory);
-        }
-
-        // Add context and instruction prompts
-        prompt.AppendLine($"\n{contextPrompt}");
-        prompt.AppendLine($"\n{instructionPrompt}");
-
-        return prompt.ToString();
     }
 } 
