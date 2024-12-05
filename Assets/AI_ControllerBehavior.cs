@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using System.Collections;
+using System.Text;
 
 public class AI_ControllerBehavior : MonoBehaviour
 {
@@ -189,9 +190,14 @@ public class AI_ControllerBehavior : MonoBehaviour
         // Build context about nearby entities, attackers, and current target
         contextPrompt = $"Nearby Agents:\n{GetNearbyAgentsInfo()}\n" +
                        $"Attackers:\n{GetAttackersInfo()}\n" +
-                       $"Current Target: {targetName}\n" +
-                       $"Allies:\n{GetAlliesInfo()}\n" +
-                       $"Enemies:\n{GetEnemiesInfo()}";
+                       $"Current Target You Are Attacking: {targetName}";
+
+        // Only include allies and enemies info if not tagged as Enemy
+        if (!gameObject.CompareTag("Enemy"))
+        {
+            contextPrompt += $"\nAllies:\n{GetAlliesInfo()}\n" +
+                            $"Enemies:\n{GetEnemiesInfo()}";
+        }
     }
 
     private void DecideAction()
@@ -276,13 +282,26 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     private string GetNearbyAgentsInfo()
     {
-        string info = "";
-        foreach (var agent in nearbyAgents)
+        // Find all AI agents in the scene
+        AI_ControllerBehavior[] allAgents = FindObjectsOfType<AI_ControllerBehavior>();
+        nearbyAgents.Clear(); // Clear the existing list
+        
+        StringBuilder info = new StringBuilder();
+        foreach (var agent in allAgents)
         {
+            // Skip if it's this agent, is dead, or has no stats
+            if (agent == this || agent.CompareTag("Dead") || agent.GetComponent<EvolStats>()?.killed == true)
+                continue;
+            
+            // Add to nearby agents list
+            nearbyAgents.Add(agent);
+            
+            // Calculate distance and add to info string
             float distance = Vector3.Distance(transform.position, agent.transform.position);
-            info += $"- {agent.name} (Distance: {distance:F1} units)\n";
+            info.AppendLine($"- {agent.name} (Distance: {distance:F1} units)");
         }
-        return string.IsNullOrEmpty(info) ? "None" : info;
+        
+        return info.Length == 0 ? "None" : info.ToString();
     }
 
     private string GetAttackersInfo()
