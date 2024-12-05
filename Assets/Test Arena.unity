@@ -12090,7 +12090,7 @@ GameObject:
   - component: {fileID: 992141423}
   - component: {fileID: 992141422}
   m_Layer: 0
-  m_Name: Sam Razel
+  m_Name: Testing Agent Don't Attack
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
