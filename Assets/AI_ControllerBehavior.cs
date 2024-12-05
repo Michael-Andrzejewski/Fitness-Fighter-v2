@@ -16,7 +16,7 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     [Header("AI Prompts")]
     [TextArea(3, 10)]
-    public string systemPrompt = "You are an AI agent in a combat simulation. You can communicate with other agents and engage in combat. Your responses should reflect your personality and strategic thinking. Focus on building alliances when possible, but be ready to defend yourself.";
+    public string systemPrompt = "You are an AI agent in a combat simulation. You can communicate with other agents and engage in combat. Your responses should reflect your personality and strategic thinking. Focus on building alliances when possible, but remember that attacking is ultimately how you win the game. Successfully attacking and defeating another character will gain you points.";
     [TextArea(3, 10)]
     public string instructionPrompt = "You may take ONE of the following actions. Respond with exactly ONE action in brackets:\n" +
         "[message agentName: Your message] - to communicate with another agent\n" +
@@ -232,16 +232,18 @@ public class AI_ControllerBehavior : MonoBehaviour
 
     private void UpdateContextPrompt()
     {
-        // Build context about nearby entities, attackers, and current target
-        contextPrompt = $"Nearby Agents:\n{GetNearbyAgentsInfo()}\n" +
-                       $"Attackers:\n{GetAttackersInfo()}\n\n" +
-                       $"Current Target You Are Attacking:\n{(string.IsNullOrEmpty(targetName) ? "None" : targetName)}";
+        // Start with the agent's name and global chat history
+        contextPrompt = $"Your Name is {gameObject.name}\n\n" +
+                        $"Global Chat History:\n{globalChatHistory}\n\n" +
+                        $"Nearby Agents:\n{GetNearbyAgentsInfo()}\n" +
+                        $"Attackers:\n{GetAttackersInfo()}\n\n" +
+                        $"Current Target You Are Attacking:\n{(string.IsNullOrEmpty(targetName) ? "None" : targetName)}";
 
         // Only include allies and enemies info if not tagged as Enemy
         if (!gameObject.CompareTag("Enemy"))
         {
             contextPrompt += $"\nAllies:\n{GetAlliesInfo()}\n" +
-                            $"Enemies:\n{GetEnemiesInfo()}";
+                             $"Enemies:\n{GetEnemiesInfo()}";
         }
     }
 

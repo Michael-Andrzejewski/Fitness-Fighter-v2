@@ -4873,7 +4873,7 @@ GameObject:
   - component: {fileID: 992141423}
   - component: {fileID: 992141422}
   m_Layer: 0
-  m_Name: Clone Base (2)
+  m_Name: Sam
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4954,8 +4954,9 @@ MonoBehaviour:
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
-    and strategic thinking. Focus on building alliances when possible, but be ready
-    to defend yourself.
+    and strategic thinking. Focus on building alliances when possible, but remember
+    that attacking is ultimately how you win the game. Successfully attacking and
+    defeating another character will gain you points.
   instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
     ONE action in brackets:
 
@@ -7951,7 +7952,7 @@ GameObject:
   - component: {fileID: 1745866269}
   - component: {fileID: 1745866268}
   m_Layer: 0
-  m_Name: Clone Base (3)
+  m_Name: Clare
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8032,19 +8033,21 @@ MonoBehaviour:
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
-    and strategic thinking. Focus on building alliances when possible, but be ready
-    to defend yourself.
-  instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
-    ONE action in brackets:
+    and strategic thinking. Focus on building alliances when possible, but remember
+    that attacking is ultimately how you win the game. Successfully attacking and
+    defeating another character will gain you points.
+  instructionPrompt: 'You only have two actions available and cannot do anything
+    more advanced. Respond with exactly ONE action in brackets:
 
 
-    [message agentName: Your message] - to communicate
-    with another agent
+    [message agentName:
+    Your message] - to communicate with another agent
 
-    [attack agentName] - to attack another agent
+    [attack agentName] - to
+    attack another agent
 
-    Consider
-    your relationships, current health, and tactical situation when deciding.'
+    Consider your relationships, current health, and tactical
+    situation when deciding.'
   contextPrompt: 
   actionCooldown: 10
   aiAgentPrefab: {fileID: 0}
@@ -9231,7 +9234,7 @@ GameObject:
   - component: {fileID: 1994900905}
   - component: {fileID: 1994900904}
   m_Layer: 0
-  m_Name: Clone Base (1)
+  m_Name: John
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9312,8 +9315,9 @@ MonoBehaviour:
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
-    and strategic thinking. Focus on building alliances when possible, but be ready
-    to defend yourself.
+    and strategic thinking. Focus on building alliances when possible, but remember
+    that attacking is ultimately how you win the game. Successfully attacking and
+    defeating another character will gain you points.
   instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
     ONE action in brackets:
 
@@ -11855,7 +11859,7 @@ GameObject:
   - component: {fileID: 7956449420209920694}
   - component: {fileID: 7956449420209920695}
   m_Layer: 0
-  m_Name: Clone Base
+  m_Name: Michael
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11911,8 +11915,9 @@ MonoBehaviour:
   targetName: 
   systemPrompt: You are an AI agent in a combat simulation. You can communicate with
     other agents and engage in combat. Your responses should reflect your personality
-    and strategic thinking. Focus on building alliances when possible, but be ready
-    to defend yourself.
+    and strategic thinking. Focus on building alliances when possible, but remember
+    that attacking is ultimately how you win the game. Successfully attacking and
+    defeating another character will gain you points.
   instructionPrompt: 'You may take ONE of the following actions. Respond with exactly
     ONE action in brackets:
 
